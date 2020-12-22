@@ -32,13 +32,32 @@ export class PlayList extends React.Component {
 						"https://assets.breatheco.de/apis/sound/files/cartoons/songs/x-men.mp3"
 				}
 			],
-			currentSong: 0
+			currentSong: 0,
+			musicVolume: 50
 		};
 	}
+	componentDidMount() {
+		fetch("https://assets.breatheco.de/apis/sound/songs")
+			.then(function(response) {
+				if (!response.ok) {
+					throw Error(response.statusText);
+				}
+				return response.json();
+			})
+			.then(jsonifiedResponse =>
+				this.setState({ songs: jsonifiedResponse })
+			)
+			.catch(function(error) {
+				console.log("Looks like there was a problem: \n", error);
+			});
+	}
+
 	playSong = i => {
 		this.state.songs.map((song, index) => {
 			if (index == i) {
-				this.player.src = song.url;
+				this.player.src =
+					"https://assets.breatheco.de/apis/sound/" +
+					this.state.songs[index].url;
 				this.player.play();
 				this.setState({ currentSong: index });
 			} else if (i > index) {
@@ -54,7 +73,6 @@ export class PlayList extends React.Component {
 	pauseSong = i => {
 		this.state.songs.map((song, index) => {
 			if (index == i) {
-				this.player.src = song.url;
 				this.player.pause();
 			}
 		});
@@ -66,6 +84,25 @@ export class PlayList extends React.Component {
 		var randomizer = Math.floor(Math.random() * this.state.songs);
 		this.setState({ currentSong: randomizer });
 		this.player.play();
+	};
+
+	repeat = i => {
+		this.setState({ currentSong: i });
+	};
+
+	setVolume = e => {
+		this.player.volume = e.target.value / 100;
+	};
+	mutePlayer = () => {
+		this.soundButton.style.display = "none";
+		this.muteButton.style.display = "inline";
+		this.setState({ musicVolume: 0 });
+		//this.player.muted = true;
+	};
+	unMutePlayer = () => {
+		this.soundButton.style.display = "inline";
+		this.muteButton.style.display = "none";
+		//this.player.muted = false;
 	};
 
 	render() {
@@ -87,13 +124,17 @@ export class PlayList extends React.Component {
 										className="fas fa-pause-circle"
 									/>
 								</span>
-								{index + 1 + "."}{" "}
-								{song.author + " - " + song.title}
+								{index + 1 + "."} {song.name}
 							</li>
 						);
 					})}
 				</ol>
 				<div className="fixed-bottom buttonBar">
+					<span>
+						<a onClick={() => this.shuffle()}>
+							<i className="fas fa-random" />
+						</a>
+					</span>
 					<span>
 						<a
 							onClick={() =>
@@ -128,6 +169,49 @@ export class PlayList extends React.Component {
 							<i className="fas fa-caret-square-right" />
 						</a>
 					</span>
+					<span>
+						<a onClick={() => this.repeat(this.state.currentSong)}>
+							<i className="fas fa-redo" />
+						</a>
+					</span>
+					<span ref={element => (this.soundButton = element)}>
+						<a onClick={() => this.mutePlayer()}>
+							<i
+								style={{
+									position: "absolute",
+									right: "270px",
+									top: "15px"
+								}}
+								className="fas fa-volume-up"
+							/>
+						</a>
+					</span>
+					<span ref={element => (this.muteButton = element)}>
+						<a onClick={() => this.unMutePlayer()}>
+							<i
+								style={{
+									display: "none",
+									position: "absolute",
+									right: "270px",
+									top: "15px"
+								}}
+								className="fas fa-volume-mute"
+							/>
+						</a>
+					</span>
+					<input
+						id="volume-control"
+						type="range"
+						min="0"
+						max="100"
+						step="1"
+						value={this.state.musicVolume}
+						onInput={e => this.setVolume(e)}
+						onChange={e =>
+							this.setState({ musicVolume: e.target.value })
+						}
+					/>
+
 					<audio
 						src={this.state.songs[0].url}
 						ref={el => (this.player = el)}
@@ -138,5 +222,5 @@ export class PlayList extends React.Component {
 		);
 	}
 }
-//Can you set a button to set a state? Ex: when clicking the button, it'll set the state to "paused" or "play"
-//If else statements on the state of musicState? If musicState == "pause" then .paused()
+//Work on line 134 for the shuffle function, work on line 173 for the repeat function, both are not working atm.
+//Get the volume button to toggle to muted and unmuted on lines 177-201

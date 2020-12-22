@@ -30,3 +30,31 @@ span{
 .list:hover{
     background-color: rgb(81,80,81);
 }
+input{
+    position: absolute;
+    top:40px;
+    right: 50px;
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    input[type='range'] {
+    overflow: hidden;
+    height:10px;
+    width: 200px;
+    -webkit-appearance: none;
+    background-color: rgb(81,80,81);
+    outline: none;
+    border-radius: 3px;
+    }
+    
+
+    input[type='range']::-webkit-slider-thumb {
+    width: 10px;
+    -webkit-appearance: none;
+    height: 10px;
+    cursor: ew-resize;
+    background: white;
+    box-shadow: -200px 0px 20px 200px lime;
+    border-radius: 50%;
+    }
+
+}
